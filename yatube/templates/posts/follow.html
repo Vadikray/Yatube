@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+
+{% block title %}
+Последние обновления на сайте
+{% endblock %}
+
+
+{% block content %}
+<div class="container">
+    <h1>Последние обновления на подписанных авторов</h1>
+    <h3>Количество авторов, на которых вы подписаны: {{ following_count }}</h3>
+    {% include 'posts/includes/switcher.html' %}
+    {% for post in page_obj %}
+    {% include 'posts/includes/post_template.html' %}
+    {% if not forloop.last %}
+    <hr>
+    {% endif %}
+    {% endfor %}
+</div>
+{% include 'posts/includes/paginator.html' %}
+{% endblock %}
