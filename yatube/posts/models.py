@@ -102,3 +102,10 @@ class Follow(models.Model):
         related_name='following',
         verbose_name='Подписаться на автора',
     )
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['user', 'author'],
+                name='unique_booking'),
+        ]

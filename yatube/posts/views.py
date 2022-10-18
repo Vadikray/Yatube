@@ -11,22 +11,17 @@ from .utils import paginator_posts
 def index(request):
     '''Обработка основной страницы сайта'''
 
-    template = 'posts/index.html'
-    posts = Post.objects.select_related(
-        'author'
-    ).all()
-
+    posts = Post.objects.select_related('author')
     context = {
         'page_obj': paginator_posts(request, posts),
     }
 
-    return render(request, template, context)
+    return render(request, 'posts/index.html', context)
 
 
 def group_posts(request, slug):
     '''Обработка страницы группы'''
 
-    template = 'posts/group_list.html'
     group = get_object_or_404(Group, slug=slug)
     posts = group.posts.all()
     context = {
@@ -34,32 +29,28 @@ def group_posts(request, slug):
         'page_obj': paginator_posts(request, posts),
     }
 
-    return render(request, template, context)
+    return render(request, 'posts/group_list.html', context)
 
 
 def profile(request, username):
     '''Обработка страницы пользователя'''
 
-    template = 'posts/profile.html'
     author = get_object_or_404(
         User.objects,
         username=username,
     )
-    following = False
     posts_autor = author.posts.all()
-    if request.user.is_authenticated:
-        following = True if Follow.objects.filter(
-            user=request.user,
-            author=author,
-        ).count() > 0 else False
-
+    following = request.user.is_authenticated and Follow.objects.filter(
+        user=request.user,
+        author=author,
+    ).exists()
     context = {
         'page_obj': paginator_posts(request, posts_autor),
         'author': author,
         'following': following,
     }
 
-    return render(request, template, context)
+    return render(request, 'posts/profile.html', context)
 
 
 def post_detail(request, post_id):
@@ -81,8 +72,6 @@ def post_detail(request, post_id):
 def post_create(request):
     '''Обработка страницы создания поста'''
 
-    template = 'posts/create_post.html'
-
     form = PostForm(request.POST or None, files=request.FILES or None)
 
     if form.is_valid():
@@ -92,14 +81,13 @@ def post_create(request):
 
         return redirect('posts:profile', request.user.username)
 
-    return render(request, template, {'form': form})
+    return render(request, 'posts/create_post.html', {'form': form})
 
 
 @login_required
 def post_edit(request, post_id):
     '''Обработка страницы редактирования поста'''
 
-    template = 'posts/create_post.html'
     post = get_object_or_404(Post, id=post_id)
 
     if post.author != request.user:
@@ -113,7 +101,6 @@ def post_edit(request, post_id):
 
     if form.is_valid():
         form.save()
-
         return redirect('posts:post_detail', post_id)
 
     context = {
@@ -122,7 +109,7 @@ def post_edit(request, post_id):
         'post': post
     }
 
-    return render(request, template, context)
+    return render(request, 'posts/create_post.html', context)
 
 
 @login_required
@@ -144,7 +131,6 @@ def add_comment(request, post_id):
 def follow_index(request):
     '''Обработка страницы подписаок автора'''
 
-    template = 'posts/follow.html'
     posts = Post.objects.filter(author__following__user=request.user)
     following_count = Follow.objects.filter(
         author__following__user=request.user).count()
@@ -153,7 +139,7 @@ def follow_index(request):
         'page_obj': paginator_posts(request, posts),
         'following_count': following_count,
     }
-    return render(request, template, context)
+    return render(request, 'posts/follow.html', context)
 
 
 @login_required
@@ -164,7 +150,7 @@ def profile_follow(request, username):
     if request.user == author or Follow.objects.filter(
         user=request.user,
         author=author,
-    ):
+    ).exists():
         return redirect('posts:profile', username=username)
     Follow.objects.create(user=request.user, author=author)
 
@@ -176,6 +162,7 @@ def profile_unfollow(request, username):
     '''Обработка страницы отписки от автора'''
 
     author = get_object_or_404(User, username=username)
-    Follow.objects.filter(user=request.user, author=author).delete()
+    if Follow.objects.filter(user=request.user, author=author).exists():
+        Follow.objects.filter(user=request.user, author=author).delete()
 
     return redirect('posts:follow_index')
