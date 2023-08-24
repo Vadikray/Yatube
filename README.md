@@ -1,3 +1,21 @@
-# hw05_final
+# Проект Yatube
 
-[![CI](https://github.com/yandex-praktikum/hw05_final/actions/workflows/python-app.yml/badge.svg?branch=master)](https://github.com/yandex-praktikum/hw05_final/actions/workflows/python-app.yml)
+## Описание
+Yatube - это социальная сеть, в которой можно регистрироваться, читать чужие публикации и оставлять свои. Можно написать какой нибудь текст, а так же можно добавить фотографию. Есть система лайков. А так же комментарии к публикациям.
+
+## Запуск проекта
+- Клонируйте репозиторий
+- Установите виртуальное окружение
+- Активируйте виртуальное окружение, установите пакеты командой pip install -r requirements.txt
+- Проведите миграции командой python manage.py migrate
+- Запустите проект командой python manage.py runserver
+
+## Технологии
+- Python 3.9
+- Django
+- SQLite3
+- Sorl-thumbnail
+- Pillow
+
+## Автор
+[Конюшков В.А.](https://t.me/Vadikray)
